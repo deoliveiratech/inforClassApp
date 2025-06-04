@@ -44,7 +44,7 @@ const AdminAulaForm = () => {
           setExerciciosTeoricos(dados.exerciciosTeoricos || ["", "", "", "", ""]);
           setExerciciosPraticos(dados.exerciciosPraticos || ["", "", "", "", ""]);
 
-          console.log("Dados da aula:", dados.exerciciosPraticos);
+          // console.log("Dados da aula:", dados.exerciciosPraticos);
         }
         
       };
