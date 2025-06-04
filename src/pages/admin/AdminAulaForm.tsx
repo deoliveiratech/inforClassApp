@@ -9,11 +9,34 @@ import {
   setDoc,
 } from "firebase/firestore";
 
-import ReactQuill, { Quill } from 'react-quill';
-import ImageResize from 'quill-image-resize-module-react';
-import 'react-quill/dist/quill.snow.css';
-Quill.register('modules/imageResize', ImageResize);
+import { EditorContent, useEditor } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Link from '@tiptap/extension-link';
+import Image from '@tiptap/extension-image';
+import Underline from '@tiptap/extension-underline';
+import TextAlign from '@tiptap/extension-text-align';
 
+import '@/styles/tiptap.css'; // Crie um CSS para estilizar
+
+const MenuBar = ({ editor }: { editor: any }) => {
+  if (!editor) {
+    return null;
+  }
+
+  return (
+    <div className="flex flex-wrap gap-2 mb-2">
+      <button onClick={() => editor.chain().focus().toggleBold().run()} className={editor.isActive('bold') ? 'active' : ''}>Negrito</button>
+      <button onClick={() => editor.chain().focus().toggleItalic().run()} className={editor.isActive('italic') ? 'active' : ''}>Itálico</button>
+      <button onClick={() => editor.chain().focus().toggleUnderline().run()} className={editor.isActive('underline') ? 'active' : ''}>Sublinhado</button>
+      <button onClick={() => editor.chain().focus().toggleStrike().run()} className={editor.isActive('strike') ? 'active' : ''}>Riscado</button>
+      <button onClick={() => editor.chain().focus().toggleBulletList().run()} className={editor.isActive('bulletList') ? 'active' : ''}>Lista</button>
+      <button onClick={() => editor.chain().focus().toggleOrderedList().run()} className={editor.isActive('orderedList') ? 'active' : ''}>Lista ordenada</button>
+      <button onClick={() => editor.chain().focus().setParagraph().run()}>Parágrafo</button>
+      <button onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}>Título</button>
+      <button onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()}>Limpar</button>
+    </div>
+  );
+};
 
 const AdminAulaForm = () => {
   const { id } = useParams();
@@ -23,12 +46,36 @@ const AdminAulaForm = () => {
   const [resumo, setResumo] = useState("");
   const [explicacao, setExplicacao] = useState("");
   const [exemplo, setExemplo] = useState("");
-  const [exerciciosTeoricos, setExerciciosTeoricos] = useState<string[]>([
-    "", "", "", "", ""
-  ]);
-  const [exerciciosPraticos, setExerciciosPraticos] = useState<string[]>([
-    "", "", "", "", ""
-  ]);
+  const [exerciciosTeoricos, setExerciciosTeoricos] = useState<string[]>(["", "", "", "", ""]);
+  const [exerciciosPraticos, setExerciciosPraticos] = useState<string[]>(["", "", "", "", ""]);
+
+  const editorExplicacao = useEditor({
+    extensions: [
+      StarterKit,
+      Link,
+      Image,
+      Underline,
+      TextAlign.configure({ types: ['heading', 'paragraph'] }),
+    ],
+    content: explicacao,
+    onUpdate({ editor }) {
+      setExplicacao(editor.getHTML());
+    },
+  });
+
+  const editorExemplo = useEditor({
+    extensions: [
+      StarterKit,
+      Link,
+      Image,
+      Underline,
+      TextAlign.configure({ types: ['heading', 'paragraph'] }),
+    ],
+    content: exemplo,
+    onUpdate({ editor }) {
+      setExemplo(editor.getHTML());
+    },
+  });
 
   useEffect(() => {
     if (id) {
@@ -44,23 +91,21 @@ const AdminAulaForm = () => {
           setExerciciosTeoricos(dados.exerciciosTeoricos || ["", "", "", "", ""]);
           setExerciciosPraticos(dados.exerciciosPraticos || ["", "", "", "", ""]);
 
-          console.log("Dados da aula:", dados.exerciciosPraticos);
+          editorExplicacao?.commands.setContent(dados.explicacao || "");
+          editorExemplo?.commands.setContent(dados.exemplo || "");
         }
-        
       };
       carregarAula();
     } else {
       const calcularProximoNumero = async () => {
         const snap = await getDocs(collection(db, "aulas"));
-        const numeros = snap.docs
-          .map((doc) => doc.data().numero)
-          .filter((n) => typeof n === "number");
+        const numeros = snap.docs.map((doc) => doc.data().numero).filter((n) => typeof n === "number");
         const maxNumero = numeros.length > 0 ? Math.max(...numeros) : 0;
         setNumero(maxNumero + 1);
       };
       calcularProximoNumero();
     }
-  }, [id]);
+  }, [id, editorExplicacao, editorExemplo]);
 
   const gerarIdPadrao = (numero: number) => {
     return `aula-${numero.toString().padStart(2, "0")}`;
@@ -79,48 +124,19 @@ const AdminAulaForm = () => {
 
     const docId = id ? id : gerarIdPadrao(numero);
 
-    // Verificação de duplicidade se for NOVA aula
     if (!id) {
       const docRef = doc(db, "aulas", docId);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        alert(
-          `Já existe uma aula com o número ${numero} (ID: ${docId}). Por favor, escolha outro número.`
-        );
+        alert(`Já existe uma aula com o número ${numero} (ID: ${docId}). Escolha outro número.`);
         return;
       }
     }
 
     await setDoc(doc(db, "aulas", docId), dados);
-
     alert("Aula salva com sucesso!");
     navigate("/admin/aulas");
   };
-
-  const modules = {
-    toolbar: [
-      [{ header: [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ align: [] }],
-      [{ list: 'ordered' }, { list: 'bullet' }],
-      ['link', 'image'],
-      ['clean'],
-    ],
-    imageResize: {
-      // Configuração opcional
-      modules: ['Resize', 'DisplaySize', 'Toolbar'],
-    },
-  };
-
-  const formats = [
-    'header',
-    'bold', 'italic', 'underline', 'strike',
-    'align',
-    'list', 'bullet',
-    'link', 'image',
-  ];
-
-
 
   return (
     <div className="p-6 max-w-3xl mx-auto space-y-4">
@@ -157,30 +173,17 @@ const AdminAulaForm = () => {
           style={{ height: "200px" }}
         />
       </label>
+
       <label className="block">
         <span className="font-medium">O que vamos estudar</span>
-        <ReactQuill
-          theme="snow"
-          value={explicacao}
-          onChange={setExplicacao}
-          modules={modules}
-          formats={formats}
-          className="bg-white"
-          style={{ minHeight: "200px" }}
-        />
+        <MenuBar editor={editorExplicacao} />
+        <EditorContent editor={editorExplicacao} className="border rounded p-3 bg-white" />
       </label>
 
       <label className="block">
         <span className="font-medium">Exemplo</span>
-        <ReactQuill
-          theme="snow"
-          value={exemplo}
-          onChange={setExemplo}
-          modules={modules}
-          formats={formats}
-          className="bg-white"
-          style={{ height: "200px", marginBottom: "2rem" }}
-        />
+        <MenuBar editor={editorExemplo} />
+        <EditorContent editor={editorExemplo} className="border rounded p-3 bg-white" />
       </label>
 
       <div>
@@ -200,36 +203,30 @@ const AdminAulaForm = () => {
         ))}
       </div>
 
-     <div>
-  <h2 className="font-semibold">Exercícios Práticos</h2>
-  {exerciciosPraticos.map((val, i) => {
-    return (
-      <div key={i} className="mb-6 p-4 border rounded bg-white">
-        <label className="block mb-1 font-medium">Enunciado {i + 1}</label>
+      <div>
+        <h2 className="font-semibold">Exercícios Práticos</h2>
+        {exerciciosPraticos.map((val, i) => (
+          <div key={i} className="mb-6 p-4 border rounded bg-white">
+            <label className="block mb-1 font-medium">Enunciado {i + 1}</label>
 
-        {/* Visualização renderizada do HTML */}
-        <div
-          className="prose max-w-none bg-gray-50 p-3 rounded mb-3"
-          dangerouslySetInnerHTML={{ __html: val }}
-        />
+            <div
+              className="prose max-w-none bg-gray-50 p-3 rounded mb-3"
+              dangerouslySetInnerHTML={{ __html: val }}
+            />
 
-        {/* Editor para editar o conteúdo */}
-        <ReactQuill
-          theme="snow"
-          value={val}
-          modules={modules}
-          formats={formats}
-          onChange={(value) => {
-            const novaLista = [...exerciciosPraticos];
-            novaLista[i] = value;
-            setExerciciosPraticos(novaLista);
-          }}
-          className="bg-white"
-        />
+            <textarea
+              value={val}
+              onChange={(e) => {
+                const novaLista = [...exerciciosPraticos];
+                novaLista[i] = e.target.value;
+                setExerciciosPraticos(novaLista);
+              }}
+              className="w-full p-2 border rounded"
+              style={{ height: "200px" }}
+            />
+          </div>
+        ))}
       </div>
-    );
-  })}
-</div>
 
       <button
         onClick={salvar}

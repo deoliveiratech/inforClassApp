@@ -1,0 +1,9 @@
+.ProseMirror {
+  min-height: 200px;
+  outline: none;
+}
+
+button.active {
+  background-color: #2563eb;
+  color: white;
+}
