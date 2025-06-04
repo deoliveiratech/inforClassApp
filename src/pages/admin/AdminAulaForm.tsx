@@ -91,8 +91,12 @@ const AdminAulaForm = () => {
           setExerciciosTeoricos(dados.exerciciosTeoricos || ["", "", "", "", ""]);
           setExerciciosPraticos(dados.exerciciosPraticos || ["", "", "", "", ""]);
 
+<<<<<<< HEAD
           editorExplicacao?.commands.setContent(dados.explicacao || "");
           editorExemplo?.commands.setContent(dados.exemplo || "");
+=======
+          // console.log("Dados da aula:", dados.exerciciosPraticos);
+>>>>>>> 705cdf20efc36f0937bdbf62ecab13bb6d5b7b30
         }
       };
       carregarAula();

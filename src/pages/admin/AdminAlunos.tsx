@@ -76,7 +76,16 @@ const AdminAlunos = () => {
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Progresso dos Alunos</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold mb-6">Progresso dos Alunos</h1>
+        <button
+          onClick={() => navigate("/admin/prof-dashboard")}
+          className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded"
+        >
+          Voltar
+        </button>
+      </div>
+      
 
       <div className="overflow-x-auto">
         <table className="min-w-full border text-sm bg-white rounded shadow">
@@ -111,12 +120,6 @@ const AdminAlunos = () => {
           </tbody>
         </table>
       </div>
-      <button
-          onClick={() => navigate("/admin/prof-dashboard")}
-          className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded"
-        >
-          Voltar
-        </button>
     </div>
   );
 };
