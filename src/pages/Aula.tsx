@@ -47,6 +47,7 @@ const Aula = () => {
       const aulaDoc = await getDoc(doc(db, "aulas", id!));
       if (aulaDoc.exists()) setAula(aulaDoc.data() as AulaData);
 
+
       if(!uid) return;
       const progressoDoc = await getDoc(doc(db, "progresso", uid));
       const progresso = progressoDoc.exists() ? progressoDoc.data() : {};
@@ -58,6 +59,7 @@ const Aula = () => {
     };
 
     carregarAula();
+    
   }, [id, uid]);
 
   const abrirWidget = (index: number) => {
@@ -141,7 +143,6 @@ const Aula = () => {
   return todasRespostas && todosUploads;
 };
 
-
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6 bg-gray-100">
       <h1 className="text-2xl font-bold">{aula.titulo}</h1>
@@ -153,7 +154,7 @@ const Aula = () => {
           ? "Em andamento"
           : "Concluída"}
       </p>
-
+          
       <p><strong>Objetivo da aula:</strong> {aula.resumo}</p>
 
       <div>
@@ -164,13 +165,15 @@ const Aula = () => {
         />
       </div>
 
-      <div>
+      {aula.exemplo.length > 0 && (
+        <div>
         <h2 className="text-xl font-semibold mt-4 mb-2">Exemplos:</h2>
         <div
           className="prose max-w-none"
           dangerouslySetInnerHTML={{ __html: aula.exemplo }}
         />
       </div>
+      )}
 
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Exercícios Teóricos</h2>

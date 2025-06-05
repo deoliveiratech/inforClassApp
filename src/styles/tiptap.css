@@ -1,9 +1,109 @@
-.ProseMirror {
-  min-height: 200px;
-  outline: none;
+/* src/styles/tiptap.css */
+
+.tiptap-editor {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  overflow: hidden;
 }
 
-button.active {
-  background-color: #2563eb;
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  background: #f9fafb;
+  border-bottom: 1px solid #d1d5db;
+  padding: 6px 8px;
+}
+
+.toolbar button {
+  all: unset;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  padding: 4px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.toolbar button:hover {
+  background: #f3f4f6;
+}
+
+.toolbar button.active {
+  background: #2563eb;
+  border-color: #2563eb;
   color: white;
+}
+
+.toolbar .divider {
+  width: 1px;
+  background: #d1d5db;
+  margin: 0 4px;
+}
+
+.editor-content {
+  padding: 12px;
+  min-height: 200px;
+}
+
+.editor-content p {
+  margin: 0.5rem 0;
+}
+
+.editor-content h1 {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.editor-content h2 {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.editor-content h3 {
+  font-size: 1.125rem;
+  font-weight: bold;
+}
+
+.editor-content blockquote {
+  padding-left: 1rem;
+  border-left: 4px solid #d1d5db;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.editor-content code {
+  background: #f3f4f6;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+.editor-content pre {
+  background: #111827;
+  color: #f9fafb;
+  padding: 8px;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+
+.editor-content ul,
+.editor-content ol {
+  padding-left: 1.5rem;
+}
+
+.editor-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 8px 0;
+}
+
+.editor-content a {
+  color: #2563eb;
+  text-decoration: underline;
 }

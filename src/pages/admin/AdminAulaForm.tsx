@@ -9,34 +9,7 @@ import {
   setDoc,
 } from "firebase/firestore";
 
-import { EditorContent, useEditor } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import Link from '@tiptap/extension-link';
-import Image from '@tiptap/extension-image';
-import Underline from '@tiptap/extension-underline';
-import TextAlign from '@tiptap/extension-text-align';
-
-import '@/styles/tiptap.css'; // Crie um CSS para estilizar
-
-const MenuBar = ({ editor }: { editor: any }) => {
-  if (!editor) {
-    return null;
-  }
-
-  return (
-    <div className="flex flex-wrap gap-2 mb-2">
-      <button onClick={() => editor.chain().focus().toggleBold().run()} className={editor.isActive('bold') ? 'active' : ''}>Negrito</button>
-      <button onClick={() => editor.chain().focus().toggleItalic().run()} className={editor.isActive('italic') ? 'active' : ''}>Itálico</button>
-      <button onClick={() => editor.chain().focus().toggleUnderline().run()} className={editor.isActive('underline') ? 'active' : ''}>Sublinhado</button>
-      <button onClick={() => editor.chain().focus().toggleStrike().run()} className={editor.isActive('strike') ? 'active' : ''}>Riscado</button>
-      <button onClick={() => editor.chain().focus().toggleBulletList().run()} className={editor.isActive('bulletList') ? 'active' : ''}>Lista</button>
-      <button onClick={() => editor.chain().focus().toggleOrderedList().run()} className={editor.isActive('orderedList') ? 'active' : ''}>Lista ordenada</button>
-      <button onClick={() => editor.chain().focus().setParagraph().run()}>Parágrafo</button>
-      <button onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}>Título</button>
-      <button onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()}>Limpar</button>
-    </div>
-  );
-};
+import TipTapEditor from "@/components/TipTapEditor";
 
 const AdminAulaForm = () => {
   const { id } = useParams();
@@ -46,36 +19,12 @@ const AdminAulaForm = () => {
   const [resumo, setResumo] = useState("");
   const [explicacao, setExplicacao] = useState("");
   const [exemplo, setExemplo] = useState("");
-  const [exerciciosTeoricos, setExerciciosTeoricos] = useState<string[]>(["", "", "", "", ""]);
-  const [exerciciosPraticos, setExerciciosPraticos] = useState<string[]>(["", "", "", "", ""]);
-
-  const editorExplicacao = useEditor({
-    extensions: [
-      StarterKit,
-      Link,
-      Image,
-      Underline,
-      TextAlign.configure({ types: ['heading', 'paragraph'] }),
-    ],
-    content: explicacao,
-    onUpdate({ editor }) {
-      setExplicacao(editor.getHTML());
-    },
-  });
-
-  const editorExemplo = useEditor({
-    extensions: [
-      StarterKit,
-      Link,
-      Image,
-      Underline,
-      TextAlign.configure({ types: ['heading', 'paragraph'] }),
-    ],
-    content: exemplo,
-    onUpdate({ editor }) {
-      setExemplo(editor.getHTML());
-    },
-  });
+  const [exerciciosTeoricos, setExerciciosTeoricos] = useState<string[]>([
+    "", "", "", "", ""
+  ]);
+  const [exerciciosPraticos, setExerciciosPraticos] = useState<string[]>([
+    "", "", "", "", ""
+  ]);
 
   useEffect(() => {
     if (id) {
@@ -90,26 +39,21 @@ const AdminAulaForm = () => {
           setExemplo(dados.exemplo || "");
           setExerciciosTeoricos(dados.exerciciosTeoricos || ["", "", "", "", ""]);
           setExerciciosPraticos(dados.exerciciosPraticos || ["", "", "", "", ""]);
-
-<<<<<<< HEAD
-          editorExplicacao?.commands.setContent(dados.explicacao || "");
-          editorExemplo?.commands.setContent(dados.exemplo || "");
-=======
-          // console.log("Dados da aula:", dados.exerciciosPraticos);
->>>>>>> 705cdf20efc36f0937bdbf62ecab13bb6d5b7b30
         }
       };
       carregarAula();
     } else {
       const calcularProximoNumero = async () => {
         const snap = await getDocs(collection(db, "aulas"));
-        const numeros = snap.docs.map((doc) => doc.data().numero).filter((n) => typeof n === "number");
+        const numeros = snap.docs
+          .map((doc) => doc.data().numero)
+          .filter((n) => typeof n === "number");
         const maxNumero = numeros.length > 0 ? Math.max(...numeros) : 0;
         setNumero(maxNumero + 1);
       };
       calcularProximoNumero();
     }
-  }, [id, editorExplicacao, editorExemplo]);
+  }, [id]);
 
   const gerarIdPadrao = (numero: number) => {
     return `aula-${numero.toString().padStart(2, "0")}`;
@@ -132,12 +76,15 @@ const AdminAulaForm = () => {
       const docRef = doc(db, "aulas", docId);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        alert(`Já existe uma aula com o número ${numero} (ID: ${docId}). Escolha outro número.`);
+        alert(
+          `Já existe uma aula com o número ${numero} (ID: ${docId}). Por favor, escolha outro número.`
+        );
         return;
       }
     }
 
     await setDoc(doc(db, "aulas", docId), dados);
+
     alert("Aula salva com sucesso!");
     navigate("/admin/aulas");
   };
@@ -180,15 +127,20 @@ const AdminAulaForm = () => {
 
       <label className="block">
         <span className="font-medium">O que vamos estudar</span>
-        <MenuBar editor={editorExplicacao} />
-        <EditorContent editor={editorExplicacao} className="border rounded p-3 bg-white" />
+        <TipTapEditor content={explicacao} onChange={setExplicacao} />
+        {/* <div className="mt-4 p-2 border border-gray-400">
+        <h2 className="text-lg font-bold mb-2">Conteúdo HTML:</h2>
+        <div>{explicacao}</div>
+      </div> */}
       </label>
-
-      <label className="block">
+      
+      {exemplo.length > 0 && (
+        <label className="block">
         <span className="font-medium">Exemplo</span>
-        <MenuBar editor={editorExemplo} />
-        <EditorContent editor={editorExemplo} className="border rounded p-3 bg-white" />
+        <TipTapEditor content={exemplo} onChange={setExemplo} />
       </label>
+      )}
+      
 
       <div>
         <h2 className="font-semibold">Exercícios Teóricos</h2>
@@ -218,15 +170,13 @@ const AdminAulaForm = () => {
               dangerouslySetInnerHTML={{ __html: val }}
             />
 
-            <textarea
-              value={val}
-              onChange={(e) => {
+            <TipTapEditor
+              content={val}
+              onChange={(value) => {
                 const novaLista = [...exerciciosPraticos];
-                novaLista[i] = e.target.value;
+                novaLista[i] = value;
                 setExerciciosPraticos(novaLista);
               }}
-              className="w-full p-2 border rounded"
-              style={{ height: "200px" }}
             />
           </div>
         ))}
