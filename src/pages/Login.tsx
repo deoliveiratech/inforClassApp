@@ -97,7 +97,7 @@ const Login = () => {
           className="w-full p-2 border rounded mb-4"
           required
         >
-          <option value="">Selecione um curso</option>
+          {/* <option value="">Selecione um curso</option> */}
           {cursos.map((curso) => (
             <option key={curso.id} value={curso.id}>
               {curso.nome}
