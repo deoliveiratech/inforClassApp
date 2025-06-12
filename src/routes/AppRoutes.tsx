@@ -11,6 +11,7 @@ import CadastrarAula from "@/pages/CadastrarAula";
 import AdminAulas from "@/pages/admin/AdminAulas";
 import AdminAulaForm from "@/pages/admin/AdminAulaForm";
 import PainelPresencas from "@/pages/admin/PainelPresencas";
+import Aula1Interativa from "@/components/aulas/Aula1Interativa";
 
 const AppRoutes = () => (
   <Router>
@@ -20,6 +21,7 @@ const AppRoutes = () => (
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/admin/prof-dashboard" element={<ProfDashboard />} />
       <Route path="/aula/:id" element={<Aula />} />
+      <Route path="/aula/" element={<Aula1Interativa />} />
       <Route path="/admin/aulas/correcao/:id" element={<AdminAulaCorrecao />} />
       <Route path="/register-professor" element={<RegisterProfessor />} />
       <Route path="/admin/alunos" element={<AdminAlunos />} />
