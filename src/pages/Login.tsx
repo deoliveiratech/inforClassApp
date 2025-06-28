@@ -3,7 +3,7 @@ import { auth, db } from "@/lib/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc, getDocs, collection } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
-import logoJumper from '@/assets/logo_jumper.png';
+import logoSistema from '@/assets/logomarca.png';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -47,10 +47,23 @@ const Login = () => {
         return;
       }
 
+      const nomeAluno = userDoc.data()?.nome || auth.currentUser?.displayName || "Usuário";
+      if (!nomeAluno) {
+        setErro("Nome do usuário não encontrado.");
+        return;
+      }
+
       const cursoSelecionado = cursos.find(curso => curso.id === cursoId);
       const nomeCurso = cursoSelecionado ? cursoSelecionado.nome : ''; 
 
       navigate(perfil === "aluno" ? "/dashboard" : "/admin/prof-dashboard", { state: {cursoId, nomeCurso, perfil}});
+
+      setErro(""); // Limpa o erro se o login for bem-sucedido
+      setEmail(""); // Limpa o campo de email
+      setSenha(""); // Limpa o campo de senha
+      setPerfil("aluno"); // Reseta o perfil para aluno
+      setCursoId(""); // Reseta o curso selecionado
+
     } catch (err: any) {
       setErro("Email ou senha inválidos.");
       console.error(err.message);
@@ -60,7 +73,7 @@ const Login = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-500">
       <form onSubmit={handleLogin} className="bg-white p-8 rounded shadow w-full max-w-sm bg-gray-200">
-        <img src={logoJumper} />
+        <img src={logoSistema} />
         <h2 className="text-2xl font-bold mb-4 text-center">Login</h2>
         {erro && <p className="text-red-500 text-sm mb-3">{erro}</p>}
 

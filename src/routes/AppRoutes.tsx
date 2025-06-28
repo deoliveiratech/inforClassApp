@@ -13,23 +13,29 @@ import AdminAulaForm from "@/pages/admin/AdminAulaForm";
 import PainelPresencas from "@/pages/admin/PainelPresencas";
 import Aula1Interativa from "@/components/aulas/Aula1Interativa";
 
+import { PrivateRoute } from "@/components/PrivateRoute";
+
+
 const AppRoutes = () => (
   <Router>
     <Routes>
       <Route path="/" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/admin/prof-dashboard" element={<ProfDashboard />} />
-      <Route path="/aula/:id" element={<Aula />} />
       <Route path="/aula/" element={<Aula1Interativa />} />
-      <Route path="/admin/aulas/correcao/:id" element={<AdminAulaCorrecao />} />
-      <Route path="/register-professor" element={<RegisterProfessor />} />
-      <Route path="/admin/alunos" element={<AdminAlunos />} />
-      <Route path="/admin/aulas/nova-aula" element={<CadastrarAula />} />
-      <Route path="/admin/aulas" element={<AdminAulas />} />
-      <Route path="/admin/aula/nova" element={<AdminAulaForm />} />
-      <Route path="/admin/aula/:id" element={<AdminAulaForm />} />
-      <Route path="/admin/presencas" element={<PainelPresencas />} />
+      {/* ROTAS AUTENTICADAS */}
+      <Route path="/dashboard" element={<PrivateRoute><Dashboard/></PrivateRoute>} />
+      <Route path="/admin/prof-dashboard" element={<PrivateRoute><ProfDashboard /></PrivateRoute>} />
+      
+      <Route path="/aula/:id" element={<PrivateRoute><Aula /></PrivateRoute>}/>
+      <Route path="/admin/aulas/correcao/:id" element={<PrivateRoute><AdminAulaCorrecao /></PrivateRoute>} />
+      <Route path="/register-professor" element={<PrivateRoute><RegisterProfessor /></PrivateRoute>} />
+      <Route path="/admin/alunos" element={<PrivateRoute><AdminAlunos /></PrivateRoute>} />
+      <Route path="/admin/aulas/nova-aula" element={<PrivateRoute><CadastrarAula /></PrivateRoute>} />
+      <Route path="/admin/aulas" element={<PrivateRoute><AdminAulas /></PrivateRoute>} />
+      <Route path="/admin/aula/nova" element={<PrivateRoute><AdminAulaForm /></PrivateRoute>} />
+      <Route path="/admin/aula/:id" element={<PrivateRoute><AdminAulaForm /></PrivateRoute>} />
+      <Route path="/admin/presencas" element={<PrivateRoute><PainelPresencas /></PrivateRoute>} />
+      {/* FIM ROTAS AUTENTICADAS */}
     </Routes>
   </Router>
 );

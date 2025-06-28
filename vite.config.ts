@@ -12,6 +12,7 @@ export default defineConfig({
   },
   server: {
     port: 3001,
-    allowedHosts: ['painelaulas.informatica']
+    allowedHosts: ['painelaulas.informatica'],
+    open: true,
   }
 });

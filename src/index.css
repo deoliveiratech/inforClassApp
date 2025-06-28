@@ -87,4 +87,18 @@
   border-radius: 0.5rem;
 }
 
+/* Adicione isso em seu CSS global (ex: index.css) se não estiver usando Tailwind */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  font-size: 1.5rem;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
 

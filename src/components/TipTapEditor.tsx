@@ -6,6 +6,8 @@ import Underline from '@tiptap/extension-underline'
 import Link from '@tiptap/extension-link'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import Image from '@tiptap/extension-image'
+import { NodeSelection } from '@tiptap/pm/state'
+
 
 import 'highlight.js/styles/github-dark.css'
 
@@ -165,20 +167,20 @@ const TipTapEditor: React.FC<TipTapEditorProps> = ({ content, onChange }) => {
 
         {/* Alinhamento de imagem */}
         <button onClick={() => {
-          const node = editor.state.selection.node
-          if (node?.type.name === 'image') {
-            editor.commands.updateAttributes('image', { align: 'left' })
-          }
+          const selection = editor.state.selection
+            if (selection instanceof NodeSelection && selection.node.type.name === 'image') {
+              editor.commands.updateAttributes('image', { align: 'left' })
+            }
         }} className="px-2">⬅️ Img Left</button>
         <button onClick={() => {
-          const node = editor.state.selection.node
-          if (node?.type.name === 'image') {
+          const selection = editor.state.selection
+          if (selection instanceof NodeSelection && selection.node.type.name === 'image') {
             editor.commands.updateAttributes('image', { align: 'center' })
           }
         }} className="px-2">↔️ Img Center</button>
         <button onClick={() => {
-          const node = editor.state.selection.node
-          if (node?.type.name === 'image') {
+          const selection = editor.state.selection
+          if (selection instanceof NodeSelection && selection.node.type.name === 'image') {
             editor.commands.updateAttributes('image', { align: 'right' })
           }
         }} className="px-2">➡️ Img Right</button>

@@ -8,36 +8,33 @@ import {
   getDoc,
 } from "firebase/firestore";
 
-type AulaData = {
-  numero: number;
-  titulo: string;
-  exerciciosTeoricos: string[];
-  exerciciosPraticos: string[];
-};
+import type { Aula } from "@/types/Aula";
+import type { ExercicioTeorico } from "@/types/Exercicio";
 
-type Aluno = {
+interface Aluno {
   uid: string;
   nome: string;
   email: string;
-};
+}
 
-type RespostaAluno = {
+interface RespostaAluno {
   uid: string;
   nome: string;
   email: string;
   respostasTeoricas: string[];
   uploads: (string | null)[];
-};
+  exercicios: ExercicioTeorico[];
+}
 
 const AdminAulaCorrecao = () => {
-  const { id } = useParams(); // aula ID ex: aula-01
-  const [aula, setAula] = useState<AulaData | null>(null);
+  const { id } = useParams();
+  const [aula, setAula] = useState<Aula | null>(null);
   const [respostas, setRespostas] = useState<RespostaAluno[]>([]);
 
   useEffect(() => {
     const carregarDados = async () => {
       const aulaDoc = await getDoc(doc(db, "aulas", id!));
-      if (aulaDoc.exists()) setAula(aulaDoc.data() as AulaData);
+      if (aulaDoc.exists()) setAula(aulaDoc.data() as Aula);
 
       const alunosSnap = await getDocs(collection(db, "alunos"));
       const progressoSnap = await getDocs(collection(db, "progresso"));
@@ -62,6 +59,7 @@ const AdminAulaCorrecao = () => {
             email: alunosMap[doc.id]?.email || "—",
             respostasTeoricas: progresso[id!].respostasTeoricas || [],
             uploads: progresso[id!].uploads || [],
+            exercicios: (aulaDoc.data() as RespostaAluno).exerciciosTeoricos,
           });
         }
       });
@@ -101,37 +99,21 @@ const AdminAulaCorrecao = () => {
           {/* Respostas Teóricas */}
           <div>
             <h3 className="text-md font-semibold mb-2">🧠 Respostas Teóricas</h3>
-            {aula.exerciciosTeoricos.map((pergunta, i) => (
+            {aluno.exercicios.map((ex, i) => (
               <div key={i} className="mb-3">
-                <p className="font-medium text-sm">{i + 1}. {pergunta}</p>
+                <div
+                  className="font-medium text-sm prose max-w-none"
+                  dangerouslySetInnerHTML={{ __html: `${i + 1}. ${ex.enunciado}` }}
+                />
                 <div className="bg-gray-100 p-2 rounded text-sm whitespace-pre-line">
-                  {aluno.respostasTeoricas[i] || <span className="text-gray-400">Sem resposta</span>}
+                  {aluno.respostasTeoricas[i] || (
+                    <span className="text-gray-400">Sem resposta</span>
+                  )}
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Arquivos Práticos
-          <div>
-            <h3 className="text-md font-semibold mb-2">📎 Arquivos Práticos</h3>
-            {aula.exerciciosPraticos.map((descricao, i) => (
-              <div key={i} className="mb-2">
-                <p className="text-sm">{i + 1}. {descricao}</p>
-                {aluno.uploads[i] ? (
-                  <a
-                    href={aluno.uploads[i]!}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 underline text-sm"
-                  >
-                    Ver arquivo enviado
-                  </a>
-                ) : (
-                  <p className="text-red-500 text-sm">Arquivo não enviado</p>
-                )}
-              </div>
-            ))}
-          </div> */}
           {/* Arquivos Práticos */}
           <div>
             <h3 className="text-md font-semibold mb-2">📎 Arquivos Práticos</h3>
@@ -156,7 +138,6 @@ const AdminAulaCorrecao = () => {
               </div>
             ))}
           </div>
-
         </div>
       ))}
     </div>
