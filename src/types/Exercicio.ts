@@ -11,4 +11,11 @@ export type ExercicioTeorico =
     }
   | {
     tipo: "multipla-multipla"; enunciado: string; alternativas: string[]; corretas: number[]
-  };
+  }
+  | {
+      tipo: "relacione";
+      enunciado: string;
+      colunaA: string[];
+      colunaB: string[];
+      correspondencias: number[]; // índice de colunaB para cada item de colunaA
+    };

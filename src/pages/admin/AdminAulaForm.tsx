@@ -12,11 +12,14 @@ import {
 import TipTapEditor from "@/components/TipTapEditor";
 
 interface ExercicioTeorico {
-  tipo: 'texto' | 'multipla' | 'multipla-multipla';
+  tipo: 'texto' | 'multipla' | 'multipla-multipla' | 'relacione';
   enunciado: string;
   alternativas?: string[];
   correta?: number;
   corretas?: number[];
+  colunaA?: string[];
+  colunaB?: string[];
+  correspondencias?: number[];
 }
 
 const AdminAulaForm = () => {
@@ -165,6 +168,7 @@ const AdminAulaForm = () => {
               <option value="texto">Dissertativo</option>
               <option value="multipla">Múltipla Escolha (única)</option>
               <option value="multipla-multipla">Múltipla Escolha (várias)</option>
+              <option value="relacione">Relacionar Itens</option>
             </select>
 
             <div
@@ -216,47 +220,116 @@ const AdminAulaForm = () => {
                       }}
                     />
                     <button
-                onClick={() => {
-                  const novaLista = [...exerciciosTeoricos];
-                  const alternativas = [...(novaLista[i].alternativas || [])];
-                  alternativas.splice(j, 1);
-                  novaLista[i].alternativas = alternativas;
-                  setExerciciosTeoricos(novaLista);
-                }}
-                className="text-red-600 border border-red-600 px-3 py-1 rounded hover:bg-red-50 transition text-sm"
-              >
-                Remover alternativa
-              </button>
+                      onClick={() => {
+                        const novaLista = [...exerciciosTeoricos];
+                        const alternativas = [...(novaLista[i].alternativas || [])];
+                        alternativas.splice(j, 1);
+                        novaLista[i].alternativas = alternativas;
+                        setExerciciosTeoricos(novaLista);
+                      }}
+                      className="text-red-600 border border-red-600 px-3 py-1 rounded hover:bg-red-50 transition text-sm"
+                    >
+                      Remover alternativa
+                    </button>
                   </div>
                 ))}
                 {/* ADICIONAR E REMOVER ALTERNATIVAS */}
-            <button
-                onClick={() => {
-                  const novaLista = [...exerciciosTeoricos];
-                  const alternativas = [...(novaLista[i].alternativas || [])];
-                  alternativas.push("");
-                  novaLista[i].alternativas = alternativas;
-                  setExerciciosTeoricos(novaLista);
-                }}
-                className="text-blue-600 border border-blue-600 px-3 py-1 rounded hover:bg-blue-50 transition text-sm"
-              >
-                ➕ Adicionar alternativa
-              </button> <span></span>
-               <span></span>
-              
-            {/* FIM */}
-            <button
-              onClick={() => {
-                const novaLista = [...exerciciosTeoricos];
-                novaLista.splice(i, 1);
-                setExerciciosTeoricos(novaLista);
-              }}
-              className="text-red-600 border border-red-600 px-3 py-1 rounded hover:bg-red-50 transition text-sm"
-            >
-              Remover Exercício
-            </button>
-          </div>
+                <button
+                  onClick={() => {
+                    const novaLista = [...exerciciosTeoricos];
+                    const alternativas = [...(novaLista[i].alternativas || [])];
+                    alternativas.push("");
+                    novaLista[i].alternativas = alternativas;
+                    setExerciciosTeoricos(novaLista);
+                  }}
+                  className="text-blue-600 border border-blue-600 px-3 py-1 rounded hover:bg-blue-50 transition text-sm"
+                >
+                  ➕ Adicionar alternativa
+                </button> <span></span>
+                <span></span>
+
+                {/* FIM */}
+                <button
+                  onClick={() => {
+                    const novaLista = [...exerciciosTeoricos];
+                    novaLista.splice(i, 1);
+                    setExerciciosTeoricos(novaLista);
+                  }}
+                  className="text-red-600 border border-red-600 px-3 py-1 rounded hover:bg-red-50 transition text-sm"
+                >
+                  Remover Exercício
+                </button>
+              </div>
             )}
+            {ex.tipo === 'relacione' && (
+            <div className="mt-3 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold">Coluna A</h4>
+                  {(ex.colunaA || ["", "", ""]).map((item, j) => (
+                    <input
+                      key={j}
+                      type="text"
+                      value={item}
+                      onChange={(e) => {
+                        const novaLista = [...exerciciosTeoricos];
+                        const colunaA = [...(novaLista[i].colunaA || ["", "", ""])];
+                        colunaA[j] = e.target.value;
+                        novaLista[i] = {
+                          ...(novaLista[i] as any),
+                          colunaA,
+                        };
+                        setExerciciosTeoricos(novaLista);
+                      }}
+                      className="w-full p-2 border rounded mb-1"
+                      placeholder={`Item ${j + 1}`}
+                    />
+                  ))}
+                </div>
+
+                <div>
+                  <h4 className="font-semibold">Coluna B</h4>
+                  {(ex.colunaB || ["", "", ""]).map((item, j) => (
+                    // <input
+                    //   key={j}
+                    //   type="text"
+                    //   value={item}
+                    //   onChange={(e) => {
+                    //     const novaLista = [...exerciciosTeoricos];
+                    //     const colunaB = [...(novaLista[i].colunaB || ["", "", ""])];
+                    //     colunaB[j] = e.target.value;
+                    //     novaLista[i] = {
+                    //       ...(novaLista[i] as any),
+                    //       colunaB,
+                    //     };
+                    //     setExerciciosTeoricos(novaLista);
+                    //   }}
+                    //   className="w-full p-2 border rounded mb-1"
+                    //   placeholder={`Descrição ${j + 1}`}
+                    // />
+                    <textarea
+                      key={j}
+                      value={item}
+                      onChange={(e) => {
+                        const novaLista = [...exerciciosTeoricos];
+                        const colunaB = [...(novaLista[i].colunaB || ["", "", ""])];
+                        colunaB[j] = e.target.value;
+                        novaLista[i] = {
+                          ...(novaLista[i] as any),
+                          colunaB,
+                        };
+                        setExerciciosTeoricos(novaLista);
+                      }}
+                      className="w-full p-2 border rounded mb-1"
+                      placeholder={`Descrição ${j + 1}`}
+                      rows={2}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
             
           </div>
         ))}

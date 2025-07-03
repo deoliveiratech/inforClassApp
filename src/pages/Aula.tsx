@@ -13,7 +13,14 @@ declare global {
 type ExercicioTeorico =
   | { tipo: "texto"; enunciado: string }
   | { tipo: "multipla"; enunciado: string; alternativas: string[]; correta: number }
-  | { tipo: "multipla-multipla"; enunciado: string; alternativas: string[]; corretas: number[] };
+  | { tipo: "multipla-multipla"; enunciado: string; alternativas: string[]; corretas: number[] }
+  | {
+      tipo: "relacione";
+      enunciado: string;
+      colunaA: string[];
+      colunaB: string[];
+      correspondencias: number[]; // índice de colunaB para cada item de colunaA
+    };
 
 type AulaData = {
   numero: number;
@@ -25,17 +32,17 @@ type AulaData = {
   exerciciosPraticos: string[];
 };
 
+type RespostaTeorica = string | { respostas: string[] };
+
 const Aula = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-
   const uid = auth.currentUser?.uid;
   const { alunoNome } = location.state;
-
   const [carregandoModalCloudinary, setCarregandoModalCloudinary] = useState<boolean | null>(false);
   const [aula, setAula] = useState<AulaData | null>(null);
-  const [respostasTeoricas, setRespostasTeoricas] = useState<string[]>([]);
+  const [respostasTeoricas, setRespostasTeoricas] = useState<RespostaTeorica[]>([]);
   const [uploadURLs, setUploadURLs] = useState<(string | null)[]>([]);
   const [status, setStatus] = useState<"nao_iniciada" | "em_andamento" | "concluida">("nao_iniciada");
 
@@ -176,26 +183,41 @@ const Aula = () => {
 
   if (!aula) return <div className="p-6">Carregando aula...</div>;
 
-  const podeConcluirAula = () => {
-    const todasRespostas = respostasTeoricas.every((resposta, i) => {
-      const exercicio = aula.exerciciosTeoricos[i];
-      if (!exercicio) return false;
-      const respostaSegura = resposta ?? "";
-      if (exercicio.tipo === "texto") return respostaSegura.trim() !== "";
-      if (exercicio.tipo === "multipla") return respostaSegura !== "";
-      if (exercicio.tipo === "multipla-multipla") {
-        try {
-          const arr = JSON.parse(respostaSegura);
-          return Array.isArray(arr) && arr.length > 0;
-        } catch {
-          return false;
-        }
+const podeConcluirAula = () => {
+  const todasRespostas = respostasTeoricas.every((resposta, i) => {
+    const exercicio = aula.exerciciosTeoricos[i];
+    if (!exercicio) return false;
+
+    if (exercicio.tipo === "texto") {
+      return typeof resposta === "string" && resposta.trim() !== "";
+    }
+
+    if (exercicio.tipo === "multipla") {
+      return typeof resposta === "string" && resposta !== "";
+    }
+
+    if (exercicio.tipo === "multipla-multipla") {
+      if (typeof resposta !== "string") return false;
+      try {
+        const arr = JSON.parse(resposta);
+        return Array.isArray(arr) && arr.length > 0;
+      } catch {
+        return false;
       }
-      return false;
-    });
-    const todosUploads = uploadURLs.every((url) => url !== null);
-    return todasRespostas && todosUploads;
-  };
+    }
+
+    if (exercicio.tipo === "relacione") {
+      if (typeof resposta !== "object" || !resposta?.respostas) return false;
+      return resposta.respostas.every((r: string) => r.trim() !== "");
+    }
+
+    return false;
+  });
+
+  const todosUploads = uploadURLs.every((url) => url !== null);
+  return todasRespostas && todosUploads;
+};
+
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6 bg-gray-100">
@@ -275,6 +297,39 @@ const Aula = () => {
                     </label>
                   );
                 })}
+              </div>
+            ) : ex.tipo === "relacione" ? (
+              <div className="mt-3 space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-semibold">Coluna A</h4>
+                    {ex.colunaA.map((item, j) => (
+                      <p key={j} className="mb-2">{`${j + 1}. ${item}`}</p>
+                    ))}
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold">Coluna B</h4>
+                    {ex.colunaB.map((item, j) => (
+                      <div key={j} className="mb-2">
+                        <textarea
+                          value={`( ${(respostasTeoricas[i] as unknown as { respostas: string[] })?.respostas?.[j] || ""} ) ${item}`}
+                          onChange={(e) => {
+                            const match = e.target.value.match(/^\(\s*(\d*)\s*\)/);
+                            const numero = match ? match[1] : "";
+                            const novas = [...respostasTeoricas];
+                            const respostas = [...((novas[i] as unknown as { respostas: string[] })?.respostas || ["", "", ""])];
+                            respostas[j] = numero;
+                            novas[i] = { respostas };
+                            setRespostasTeoricas(novas);
+                          }}
+                          rows={2}
+                          className="w-full p-2 border rounded resize-y"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             ) : null}
           </div>
