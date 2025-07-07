@@ -1,9 +1,12 @@
+
+import type { ExercicioTeorico } from "./Exercicio";
+
 export type Aula = {
   id: number;
-  title: string;
-  summary: string;
+  titulo: string;
+  numero: string;
   explanation: string;
-  example: string;
-  theoreticalExercises: string[];
-  practicalExercises: string[];
+  exemplo: string;
+  exerciciosTeoricos: ExercicioTeorico[];
+  exerciciosPraticos: string[];
 };

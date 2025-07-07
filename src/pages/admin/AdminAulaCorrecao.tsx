@@ -21,10 +21,11 @@ interface RespostaAluno {
   uid: string;
   nome: string;
   email: string;
-  respostasTeoricas: string[];
+  respostasTeoricas: (string | { respostas: string[] } | any)[];
   uploads: (string | null)[];
   exercicios: ExercicioTeorico[];
 }
+
 
 const AdminAulaCorrecao = () => {
   const { id } = useParams();
@@ -59,7 +60,7 @@ const AdminAulaCorrecao = () => {
             email: alunosMap[doc.id]?.email || "—",
             respostasTeoricas: progresso[id!].respostasTeoricas || [],
             uploads: progresso[id!].uploads || [],
-            exercicios: (aulaDoc.data() as RespostaAluno).exerciciosTeoricos,
+            exercicios: (aulaDoc.data() as Aula).exerciciosTeoricos,
           });
         }
       });
@@ -87,7 +88,6 @@ const AdminAulaCorrecao = () => {
           key={index}
           className="border border-gray-300 bg-white rounded-lg shadow p-6 space-y-4"
         >
-          {/* Dados do aluno */}
           <div className="flex flex-col md:flex-row md:justify-between md:items-center">
             <div>
               <p className="text-lg font-bold">{aluno.nome}</p>
@@ -96,7 +96,6 @@ const AdminAulaCorrecao = () => {
             </div>
           </div>
 
-          {/* Respostas Teóricas */}
           <div>
             <h3 className="text-md font-semibold mb-2">🧠 Respostas Teóricas</h3>
             {aluno.exercicios.map((ex, i) => (
@@ -106,15 +105,20 @@ const AdminAulaCorrecao = () => {
                   dangerouslySetInnerHTML={{ __html: `${i + 1}. ${ex.enunciado}` }}
                 />
                 <div className="bg-gray-100 p-2 rounded text-sm whitespace-pre-line">
-                  {aluno.respostasTeoricas[i] || (
-                    <span className="text-gray-400">Sem resposta</span>
-                  )}
+                  {(() => {
+                    const resposta = aluno.respostasTeoricas[i];
+                    if (ex.tipo === "relacione" && resposta?.respostas) {
+                      return ex.colunaB
+                        .map((desc, j) => `(${resposta.respostas[j] || ""}) ${desc}`)
+                        .join("\n");
+                    }
+                    return resposta || <span className="text-gray-400">Sem resposta</span>;
+                  })()}
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Arquivos Práticos */}
           <div>
             <h3 className="text-md font-semibold mb-2">📎 Arquivos Práticos</h3>
             {aula.exerciciosPraticos.map((descricao, i) => (

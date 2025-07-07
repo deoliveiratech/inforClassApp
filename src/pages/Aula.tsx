@@ -102,7 +102,7 @@ const Aula = () => {
           sources: ["local", "url"],
           multiple: false,
           resourceType: "auto",
-          clientAllowedFormats: ["xlsx", "txt"],
+          clientAllowedFormats: ["xlsx", "txt", "png", "jpeg", "jpg"],
           maxFileSize: 5 * 1024 * 1024,
           publicId: `aula-${id}-exercicio-${index + 1}-${uid?.slice(0, 6) || "anon"}`,
           tags: [`aula-${id}`, `aluno-${uid}`],
@@ -219,6 +219,7 @@ const podeConcluirAula = () => {
 };
 
 
+
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6 bg-gray-100">
       {carregandoModalCloudinary && (
@@ -250,7 +251,7 @@ const podeConcluirAula = () => {
           <div key={i} className="p-4 border rounded bg-white space-y-2">
             <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: ex.enunciado }} />
             {ex.tipo === "texto" ? (
-              <textarea className="w-full p-2 border rounded" value={respostasTeoricas[i] || ""} onChange={(e) => {
+              <textarea className="w-full p-2 border rounded" value={typeof respostasTeoricas[i] === "string" ? respostasTeoricas[i] : ""} onChange={(e) => {
                 const novas = [...respostasTeoricas];
                 novas[i] = e.target.value;
                 setRespostasTeoricas(novas);
@@ -272,8 +273,10 @@ const podeConcluirAula = () => {
               <div className="space-y-2">
                 {ex.alternativas.map((alt, j) => {
                   const selecionadas: string[] = (() => {
+                    const raw = respostasTeoricas[i];
+                    if (typeof raw !== "string") return [];
                     try {
-                      const parsed = JSON.parse(respostasTeoricas[i] || "[]");
+                      const parsed = JSON.parse(raw);
                       return Array.isArray(parsed) ? parsed.map(String) : [];
                     } catch {
                       return [];
